@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>My Code Project</title>
+    <style>
+/* --- Start Custom CSS --- */
+/* Welcome! Start your CSS here */
+/* This will be included in the <style> tags when you save the project */
+
+body {
+  font-family: sans-serif;
+  margin: 20px;
+  background-color: #333;
+  color: #eee;
+}
+
+h1 {
+  color: #00bcd4; /* Cyan */
+}
+
+#my-box {
+  background-color: #444;
+  border: 1px solid #555;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+button {
+  background-color: #4CAF50; /* Green */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+/* --- End Custom CSS --- */
+    </style>
+</head>
+<body>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>GEBER LIGHTING — HP FINAL (No Overlay)</title>
+<style>
+  :root{
+    --bg:#000;
+    --panel:#07121a;
+    --accent:#00d4ff;
+    --muted:#9fb0c4;
+    --ui-radius:10px;
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:#eaf6ff;font-family:Inter,system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  #app{display:flex;flex-direction:column;height:100vh;width:100vw;overflow:hidden}
+  #stageWrap{flex:1;position:relative;background:#000}
+  canvas#stage{display:block;width:100%;height:100%}
+  .panel{flex:0 0 auto;background:var(--panel);padding:10px;overflow-y:auto;max-height:42%;display:flex;flex-direction:column;gap:10px}
+  .label{font-size:12px;color:var(--muted);margin-bottom:4px}
+  input[type=range]{width:100%}
+  input[type=color]{appearance:none;border:none;padding:0;margin:0;width:48px;height:36px;border-radius:8px;cursor:pointer}
+  button,select{padding:10px;border-radius:10px;border:none;background:#082528;color:#eaf6ff;font-weight:700;cursor:pointer}
+  .bigBtn{background:linear-gradient(90deg,var(--accent),#006b7a);color:#001922;font-weight:900}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .col{flex:1;display:flex;flex-direction:column}
+  .presetRow{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px}
+  .presetBox{background:#092023;padding:6px;border-radius:10px;display:flex;flex-direction:column;align-items:center;min-width:64px}
+  .presetFader{height:120px;writing-mode:bt-lr;-webkit-appearance:slider-vertical}
+  .colorBtns{display:flex;gap:6px;flex-wrap:wrap}
+  .colorBtn{flex:1;min-width:42px;padding:8px;border-radius:8px;border:none;color:#000;font-weight:800}
+  .smallBtn{padding:8px;font-size:12px;background:#092023;border-radius:8px}
+  .small{font-size:12px;color:var(--muted);text-align:center}
+  .footer{text-align:center;font-size:11px;color:#7da;margin-top:6px}
+  @media(min-width:920px){
+    #app{flex-direction:row}
+    #stageWrap{flex:1}
+    .panel{width:420px;height:100vh;max-height:none;overflow:auto}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stageWrap">
+    <canvas id="stage" aria-label="Lighting Stage"></canvas>
+  </div>
+
+  <div class="panel" id="panel">
+    <button id="powerBtn" class="bigBtn">POWER ON</button>
+
+    <div class="row">
+      <div class="col"><div class="label">Jumlah Beam</div><input id="beamCount" type="range" min="4" max="12" step="2" value="8"><div class="small">Beams: <span id="beamCountLabel">8</span></div></div>
+      <div class="col"><div class="label">Dimmer</div><input id="dimmer" type="range" min="0" max="100" value="95"></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><div class="label">Beam Angle (°)</div><input id="beamAngle" type="range" min="5" max="40" value="12"></div>
+      <div class="col"><div class="label">Beam Range (px)</div><input id="beamRange" type="range" min="200" max="1600" value="900"></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><div class="label">Global Warna</div><input id="globalColor" type="color" value="#00ffff"></div>
+      <div class="col"><div class="label">Rainbow</div><button id="rainbowBtn">RAINBOW OFF</button></div>
+      <div class="col"><div class="label">Gobo Aurora</div><button id="goboBtn">AURORA OFF</button></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><div class="label">Prisma</div>
+        <select id="prismaMode">
+          <option value="none">None</option>
+          <option value="split3">Split 3</option>
+          <option value="split5">Split 5</option>
+          <option value="split7">Split 7</option>
+          <option value="linear">Linear</option>
+          <option value="combo">Combo</option>
+        </select>
+      </div>
+      <div class="col"><div class="label">Prisma Rotate</div><button id="prismaRotate">ROTATE OFF</button></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><div class="label">Strobe Mode</div><select id="strobeMode"><option value="off">Off</option><option value="blink">Blink</option><option value="flow">Flow</option><option value="random">Random</option></select></div>
+      <div class="col"><div class="label">Strobe Speed (Hz)</div><input id="strobeSpeed" type="range" min="1" max="80" value="14"></div>
+    </div>
+
+    <div>
+      <div class="label">Presets Gerakan (dorong 100% untuk aktif)</div>
+      <div class="presetRow" id="autoPresets"></div>
+    </div>
+
+    <div class="row">
+      <div class="col"><div class="label">Mode</div><select id="modeSelect"><option value="auto">Auto</option><option value="manual">Manual</option></select></div>
+      <div class="col"><div class="label">Manual Head</div><select id="manualHeadSelect"></select></div>
+    </div>
+
+    <div id="manualArea" style="display:none">
+      <div class="label">Pan / Tilt</div>
+      <div class="row"><input id="manualPan" type="range" min="-180" max="180" value="0"><input id="manualTilt" type="range" min="-30" max="10" value="-12"></div>
+      <div class="label">Quick Colors</div>
+      <div class="colorBtns" id="colorPresets">
+        <button class="colorBtn" data-color="#ff0000" style="background:#ff0000">R</button>
+        <button class="colorBtn" data-color="#00ff00" style="background:#00ff00">G</button>
+        <button class="colorBtn" data-color="#0000ff" style="background:#0000ff;color:#fff">B</button>
+        <button class="colorBtn" data-color="#ffffff" style="background:#fff;color:#000">W</button>
+        <button class="colorBtn" data-color="#ffff00" style="background:#ffff00;color:#000">Y</button>
+        <button class="colorBtn" data-color="#ff00ff" style="background:#ff00ff">M</button>
+        <button class="colorBtn" data-color="#00ffff" style="background:#00ffff;color:#000">C</button>
+      </div>
+      <div style="margin-top:8px"><input id="manualColor" type="color" value="#ffffff"></div>
+      <div class="row"><button id="saveHeadA" class="smallBtn">Save→A</button><button id="loadHeadA" class="smallBtn">Load←A</button><button id="saveHeadB" class="smallBtn">Save→B</button><button id="loadHeadB" class="smallBtn">Load←B</button></div>
+      <div class="row"><button id="saveAll" class="smallBtn">Save All</button><button id="loadAll" class="smallBtn">Load All</button><button id="clearSlots" class="smallBtn">Clear</button></div>
+    </div>
+
+    <div class="footer">GEBER LIGHTING — HP FINAL</div>
+  </div>
+</div>
+
+<script>
+/* ===================== GEBER LIGHTING — HP FINAL (NO OVERLAY) =====================
+   Full single-file implementation (mobile-first). Features:
+   - 4..12 beams, per-head position on truss
+   - Dimmer, beam angle, beam range
+   - Per-head color + global color + rainbow
+   - Gobo aurora, prisma (split3/5/7, linear, combo) + rotate
+   - Strobe: blink, flow, random + speed
+   - Preset motions P1..P8 (including pargoy bumerang), presets mixed when multiple active
+   - Manual mode: per-head pan/tilt/color
+   - Save/load slots (localStorage)
+   - Preset faders displayed horizontally (scrollable on narrow screens)
+   - Smooth transitions, forward-facing beams (toward audience), prisma/gobo visuals
+   ========================================================================== */
+
+/* ---------- Canvas setup ---------- */
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvasHP(){
+  canvas.width = window.innerWidth;
+  canvas.height = Math.round(window.innerHeight * 0.60);
+}
+window.addEventListener('resize', resizeCanvasHP);
+resizeCanvasHP();
+
+/* ---------- UI refs ---------- */
+const ui = {
+  powerBtn: document.getElementById('powerBtn'),
+  beamCount: document.getElementById('beamCount'),
+  beamCountLabel: document.getElementById('beamCountLabel'),
+  dimmer: document.getElementById('dimmer'),
+  beamAngle: document.getElementById('beamAngle'),
+  beamRange: document.getElementById('beamRange'),
+  globalColor: document.getElementById('globalColor'),
+  rainbowBtn: document.getElementById('rainbowBtn'),
+  goboBtn: document.getElementById('goboBtn'),
+  prismaMode: document.getElementById('prismaMode'),
+  prismaRotate: document.getElementById('prismaRotate'),
+  strobeMode: document.getElementById('strobeMode'),
+  strobeSpeed: document.getElementById('strobeSpeed'),
+  autoPresets: document.getElementById('autoPresets'),
+  modeSelect: document.getElementById('modeSelect'),
+  manualArea: document.getElementById('manualArea'),
+  manualHeadSelect: document.getElementById('manualHeadSelect'),
+  manualPan: document.getElementById('manualPan'),
+  manualTilt: document.getElementById('manualTilt'),
+  manualColor: document.getElementById('manualColor'),
+  colorPresets: document.getElementById('colorPresets'),
+  saveHeadA: document.getElementById('saveHeadA'),
+  loadHeadA: document.getElementById('loadHeadA'),
+  saveHeadB: document.getElementById('saveHeadB'),
+  loadHeadB: document.getElementById('loadHeadB'),
+  saveAll: document.getElementById('saveAll'),
+  loadAll: document.getElementById('loadAll'),
+  clearSlots: document.getElementById('clearSlots')
+};
+
+/* ---------- State ---------- */
+const PRESET_THRESHOLD = 95;
+const SMOOTH = 0.12;
+let currentBeamCount = Number(ui.beamCount.value);
+let strobeAccum = 0;
+const state = {
+  power: true,
+  dimmer: Number(ui.dimmer.value)/100,
+  angle: Number(ui.beamAngle.value),
+  range: Number(ui.beamRange.value),
+  globalColor: ui.globalColor.value,
+  rainbow: false,
+  gobo: false,
+  strobeMode: ui.strobeMode.value,
+  strobeSpeed: Number(ui.strobeSpeed.value),
+  prismaMode: ui.prismaMode.value,
+  prismaRotate: false,
+  time: 0,
+  presetActive: new Array(8).fill(false),
+  heads: [],
+  manualSelected: 0,
+  beamOnTop: true
+};
+
+/* ---------- Helpers ---------- */
+function lerp(a,b,f){ return a + (b-a)*f; }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function setStatus(text, ttl=900){
+  // Use power button as temporary status display (mobile friendly)
+  ui.powerBtn.textContent = text;
+  clearTimeout(ui._t);
+  ui._t = setTimeout(()=>ui.powerBtn.textContent = state.power ? 'POWER ON' : 'POWER OFF', ttl);
+}
+function rgbaFrom(hexOrHsl, a){
+  if(!hexOrHsl) return `rgba(255,255,255,${a})`;
+  if(hexOrHsl.startsWith('#')){
+    const r = parseInt(hexOrHsl.slice(1,3),16);
+    const g = parseInt(hexOrHsl.slice(3,5),16);
+    const b = parseInt(hexOrHsl.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+  if(hexOrHsl.startsWith('hsl')) return hexOrHsl.replace('hsl','hsla').replace(')', `, ${a})`);
+  return `rgba(255,255,255,${a})`;
+}
+
+/* ---------- Init heads ---------- */
+function initHeads(count = 8){
+  currentBeamCount = count;
+  ui.beamCountLabel.textContent = String(count);
+  state.heads = [];
+  const trussY = Math.round(canvas.height * 0.12);
+  const margin = Math.min(100, canvas.width * 0.06);
+  const usable = canvas.width - margin*2;
+  const spacing = count>1 ? usable/(count-1) : 0;
+  for(let i=0;i<count;i++){
+    const x = Math.round(margin + i*spacing);
+    const pan = (i-(count-1)/2) * 8;
+    const tilt = -12; // forward & slight up by default
+    state.heads.push({
+      id:i, x, y:trussY,
+      pan, tilt, targetPan: pan, targetTilt: tilt,
+      color: '#ffffff', intensity: state.dimmer,
+      angle: state.angle, range: state.range,
+      prismRotation: 0
+    });
+  }
+  buildManualHeadSelect();
+  buildColorPresetHandlers();
+}
+initHeads(currentBeamCount);
+
+/* ---------- Presets UI ---------- */
+function presetName(i){ const names=['Pargoy1','Pargoy2','Fan','Circle','SlowTilt','Circle2','Spiral','WaveSpiral']; return names[i]||`P${i+1}`; }
+function buildAutoPresetsUI(){
+  ui.autoPresets.innerHTML = '';
+  for(let i=0;i<8;i++){
+    const box = document.createElement('div'); box.className = 'presetBox';
+    const f = document.createElement('input'); f.type = 'range'; f.min = 0; f.max = 100; f.value = 0; f.dataset.id = i; f.className = 'presetFader presetFader-'+i;
+    const lbl = document.createElement('div'); lbl.className = 'small'; lbl.innerHTML = `P${i+1} — ${presetName(i)}`;
+    f.addEventListener('input', (e)=>{
+      const id = Number(e.target.dataset.id);
+      const v = Number(e.target.value);
+      const was = state.presetActive[id];
+      state.presetActive[id] = v >= PRESET_THRESHOLD;
+      if(state.presetActive[id] && !was) setStatus(`Preset ${id+1} ON`);
+      if(!state.presetActive[id] && was) setStatus(`Preset ${id+1} OFF`);
+    });
+    box.appendChild(f); box.appendChild(lbl);
+    ui.autoPresets.appendChild(box);
+  }
+}
+buildAutoPresetsUI();
+
+/* ---------- Manual head UI ---------- */
+function buildManualHeadSelect(){
+  ui.manualHeadSelect.innerHTML = '';
+  for(const h of state.heads){
+    const o = document.createElement('option'); o.value = h.id; o.textContent = `Head ${h.id+1}`; ui.manualHeadSelect.appendChild(o);
+  }
+  ui.manualHeadSelect.value = state.manualSelected;
+}
+
+/* ---------- Color presets handlers ---------- */
+function buildColorPresetHandlers(){
+  // color buttons are in DOM; add events
+  const btns = document.querySelectorAll('#colorPresets .colorBtn');
+  btns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const color = btn.dataset.color;
+      const id = Number(ui.manualHeadSelect.value);
+      const h = state.heads.find(x=>x.id === id);
+      if(h){ h.color = color; ui.manualColor.value = color; setStatus(`Head ${id+1} color set`); }
+    });
+  });
+  ui.manualColor.addEventListener('input', ()=>{
+    const id = Number(ui.manualHeadSelect.value);
+    const h = state.heads.find(x=>x.id === id);
+    if(h){ h.color = ui.manualColor.value; setStatus(`Head ${id+1} custom color`); }
+  });
+}
+
+/* ---------- Preset motion implementations (P1..P8) ---------- */
+function presetOffset(p, t, i){
+  const mid = (state.heads.length - 1)/2;
+  const dist = Math.abs(i - mid);
+  switch(p){
+    case 0: { // P1: Pargoy bumerang (pan slow LR, tilt small fast up/down but forward)
+      const panSpeed = 0.7;
+      const tiltSpeed = 3.2 + (1 - dist/(mid||1)) * 1.6;
+      const pan = Math.sin(t * panSpeed + i * 0.28) * 48; // -48..48
+      const tilt = - (8 + Math.abs(Math.sin(t * tiltSpeed + i * 0.6)) * 12); // -8 .. -20 forward/up
+      return { pan, tilt };
+    }
+    case 1: { // P2: Pargoy2 staccato (fast LR, forward)
+      const sp = 5.0;
+      const pan = Math.sign(Math.sin(t * sp + i*0.4)) * 56;
+      const tilt = -12 + Math.cos(t*0.7 + i*0.3) * -4; // around -12..-16
+      return { pan, tilt };
+    }
+    case 2: { // P3: Fan Out/In (fan forward/up)
+      const spread = Math.sin(t * 0.7) * 26;
+      const pan = (i - mid) * spread / ((state.heads.length/2) || 1);
+      const tilt = -10 + Math.cos(t * 0.9 + i*0.2) * -6; // -10 .. -16
+      return { pan, tilt };
+    }
+    case 3: { // P4: Circle Spin
+      const speed = 1.0 + dist * 0.04;
+      const ang = t * 2.3 * speed + i * (Math.PI*2 / state.heads.length);
+      return { pan: Math.sin(ang) * 28, tilt: -12 + Math.cos(ang) * 8 };
+    }
+    case 4: { // P5: Circle mutar (faster)
+      const speed = 2.4 * (1 + (1 - dist/(mid||1))*0.5);
+      const ang = t * speed + i * 0.35;
+      return { pan: Math.sin(ang) * 32, tilt: -14 + Math.cos(ang) * 10 };
+    }
+    case 5: { // P6: Zoom Stagger / slow tilt
+      const s = 0.9 + (i%3)*0.25;
+      return { pan: Math.sin(t*1.6*s + i*0.3) * (10 + (i%3)*6), tilt: -10 + Math.cos(t*0.4 + i*0.3) * -8 };
+    }
+    case 6: { // P7: Spiral / Helix
+      const speed = 1.4 * (1 + (1 - dist/(mid||1))*0.7);
+      const ang = t * speed + i * 0.45;
+      const radius = 6 + (mid - dist) * 3;
+      return { pan: Math.sin(ang) * radius * 2.2, tilt: -12 + Math.sin(t * 1.6 + i*0.6) * -14 };
+    }
+    case 7: { // P8: Wave Spiral
+      const base = Math.sin(t * 2.0 + i*0.4) * 14;
+      const wave = Math.sin(t * 1.8 + i*0.9) * 8;
+      return { pan: base + Math.sin(t * 1.2 + i*0.3)*6, tilt: -12 + Math.sin(t * 2.4 + i*0.5)*10 + wave*0.4 };
+    }
+    default:
+      return { pan: 0, tilt: -12 };
+  }
+}
+
+/* ---------- Stage drawing ---------- */
+function drawStageBackground(){
+  const g = ctx.createLinearGradient(0,0,0,canvas.height);
+  g.addColorStop(0,'#000'); g.addColorStop(1,'#04131a');
+  ctx.fillStyle = g; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // floor
+  ctx.fillStyle = '#041017'; ctx.fillRect(0, canvas.height*0.82, canvas.width, canvas.height*0.18);
+  // truss
+  const trY = canvas.height * 0.12;
+  ctx.fillStyle = '#111217'; ctx.fillRect(0, trY-10, canvas.width, 14);
+}
+
+function drawHeadMounts(){
+  const trY = canvas.height * 0.12;
+  for(const h of state.heads){
+    ctx.fillStyle = '#23282c';
+    ctx.fillRect(h.x - 12, trY - 26, 24, 12);
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.strokeRect(h.x - 12, trY - 26, 24, 12);
+  }
+}
+
+function drawHeadMarkers(){
+  for(const h of state.heads){
+    ctx.beginPath(); ctx.arc(h.x, h.y, 12, 0, Math.PI*2); ctx.fillStyle = '#0b0e11'; ctx.fill();
+    const fillColor = state.rainbow ? `hsl(${(state.time*40+h.id*14)%360},100%,70%)` : (h.color || state.globalColor || '#9fb0c4');
+    ctx.beginPath(); ctx.arc(h.x, h.y, 6, 0, Math.PI*2); ctx.fillStyle = fillColor; ctx.fill();
+    if(state.selectedHead === h.id){
+      ctx.strokeStyle = 'rgba(0,212,255,0.95)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(h.x, h.y, 18, 0, Math.PI*2); ctx.stroke();
+    }
+  }
+}
+
+/* ---------- Beam drawing (forward projection) ---------- */
+function drawBeam(head){
+  const baseX = head.x, baseY = head.y;
+  const beamAngle = (head.angle || state.angle) * Math.PI / 180;
+
+  const layers = [
+    { scale: 0.92, alpha: 1.00 },
+    { scale: 1.14, alpha: 0.36 },
+    { scale: 1.45, alpha: 0.10 },
+    { scale: 1.9, alpha: 0.05 }
+  ];
+
+  const baseColor = state.rainbow ? `hsl(${(state.time*40 + head.id*14) % 360},100%,70%)` : (head.color || state.globalColor || '#ffffff');
+
+  function computeEndpoint(panDeg, tiltDeg, scale){
+    const pR = panDeg * Math.PI/180;
+    const tR = tiltDeg * Math.PI/180;
+    // 3D-like direction
+    const dx3 = Math.sin(pR) * Math.cos(tR);    // left-right
+    const dy3 = Math.sin(tR);                   // up-down tilt
+    const dz3 = Math.cos(pR) * Math.cos(tR);    // forward depth (toward audience)
+    const lenBase = Number(head.range || state.range);
+    const len = lenBase * scale * (1 - Math.abs(dy3) * 0.35);
+    const endX = baseX + dx3 * len;
+    const endY = baseY + dz3 * len;
+    const spread = Math.tan(beamAngle) * len;
+    return { endX, endY, spread };
+  }
+
+  function drawConeLayer(scale, alpha, panOffset=0){
+    const e = computeEndpoint(head.pan + panOffset, head.tilt, scale);
+    const grad = ctx.createLinearGradient(baseX, baseY, e.endX, e.endY);
+    const a0 = state.dimmer * alpha;
+    grad.addColorStop(0, rgbaFrom(baseColor, a0));
+    grad.addColorStop(0.5, rgbaFrom(baseColor, a0 * 0.12));
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath();
+    ctx.moveTo(baseX, baseY);
+    ctx.lineTo(e.endX - e.spread * 0.6, e.endY);
+    ctx.lineTo(e.endX + e.spread * 0.6, e.endY);
+    ctx.closePath();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  // core
+  drawConeLayer(layers[0].scale, layers[0].alpha);
+
+  // prisma modes
+  const pm = state.prismaMode;
+  if(pm.startsWith('split')){
+    const n = Number(pm.replace('split','')) || 3;
+    const spreadDeg = 16;
+    const rot = state.prismaRotate ? (head.prismRotation || 0) : 0;
+    for(let k=0;k<n;k++){
+      const frac = n===1?0.5:k/(n-1);
+      const offDeg = (frac - 0.5) * spreadDeg + rot;
+      drawConeLayer(1.06, 0.28, offDeg);
+    }
+    drawConeLayer(1.12, 0.22); drawConeLayer(1.45, 0.08);
+  } else if(pm === 'linear'){
+    const n = 4; const spacing = 10;
+    for(let k=0;k<n;k++){ const off = (k - (n-1)/2) * spacing; drawConeLayer(1 + Math.abs(off)/50, 0.26, off); }
+  } else if(pm === 'combo'){
+    for(let k=0;k<3;k++) drawConeLayer(1 + k*0.06, 0.22);
+    const rot = state.prismaRotate ? (head.prismRotation || 0) : 0;
+    for(let p=0;p<4;p++) drawConeLayer(1.1 + p*0.05, 0.16, rot + p*2);
+  }
+
+  // outer haze
+  drawConeLayer(layers[3].scale, layers[3].alpha);
+
+  // Gobo Aurora overlay — soft moving texture inside beam
+  if(state.gobo){
+    const e = computeEndpoint(head.pan, head.tilt, 0.85);
+    ctx.save();
+    ctx.globalAlpha = 0.25 * state.dimmer;
+    ctx.translate(e.endX, e.endY);
+    ctx.rotate((state.time*0.4 + head.id*0.35) % (Math.PI*2));
+    const aur = ctx.createRadialGradient(0,0,0,0,0, Math.max(60, Math.tan(beamAngle) * (head.range||state.range) * 0.55));
+    aur.addColorStop(0, 'rgba(120,220,255,0.45)');
+    aur.addColorStop(0.45, 'rgba(220,120,255,0.28)');
+    aur.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = aur;
+    ctx.beginPath();
+    ctx.ellipse(0,0,(head.range||state.range)*0.06,(head.range||state.range)*0.04,0,0,Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // soft floor spot
+  const ep = computeEndpoint(head.pan, head.tilt, 0.95);
+  const radius = 10 + (head.intensity||1) * 8;
+  const gSpot = ctx.createRadialGradient(ep.endX, ep.endY, 0, ep.endX, ep.endY, radius);
+  gSpot.addColorStop(0, rgbaFrom(baseColor, 0.34 * state.dimmer));
+  gSpot.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.fillStyle = gSpot;
+  ctx.fillRect(ep.endX - radius, ep.endY - radius, radius*2, radius*2);
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+/* ---------- Strobe logic ---------- */
+function strobeVisibleForHead(index){
+  const mode = state.strobeMode;
+  const speed = clamp(Number(state.strobeSpeed), 0.5, 200);
+  if(mode === 'off' || !state.power) return true;
+  if(mode === 'blink'){
+    return Math.floor(strobeAccum * speed) % 2 === 0;
+  } else if(mode === 'flow'){
+    const phase = (strobeAccum * speed * 2 * Math.PI) + (index * 0.6);
+    return Math.sin(phase) > 0;
+  } else if(mode === 'random'){
+    const v = Math.sin((strobeAccum * speed * 3.14) + index * 7.13);
+    return v > Math.cos(index * 0.3);
+  }
+  return true;
+}
+
+/* ---------- Interaction: drag heads ---------- */
+canvas.addEventListener('pointerdown', (e)=>{
+  const r = canvas.getBoundingClientRect();
+  const px = e.clientX - r.left, py = e.clientY - r.top;
+  let nearest = -1, nd = 1e9;
+  for(const h of state.heads){
+    const d = Math.hypot(px - h.x, py - h.y);
+    if(d < 30 && d < nd){ nd = d; nearest = h.id; }
+  }
+  if(nearest >= 0){
+    state.selectedHead = nearest;
+    state.dragging = true;
+    const h = state.heads.find(x=>x.id === nearest);
+    state.dragOffset = { x: px - h.x, y: py - h.y };
+    ui.manualHeadSelect.value = nearest; updateManualControls(nearest);
+    setStatus(`Selected Head ${nearest+1}`, 700);
+  } else {
+    state.selectedHead = -1;
+  }
+  drawOnce();
+});
+canvas.addEventListener('pointermove', (e)=>{
+  if(!state.dragging || state.selectedHead < 0) return;
+  const r = canvas.getBoundingClientRect();
+  const px = e.clientX - r.left, py = e.clientY - r.top;
+  const h = state.heads.find(x=>x.id === state.selectedHead);
+  h.x = Math.max(20, Math.min(canvas.width-20, Math.round(px - state.dragOffset.x)));
+  h.y = Math.max(10, Math.min(canvas.height*0.6, Math.round(py - state.dragOffset.y)));
+  drawOnce();
+});
+window.addEventListener('pointerup', ()=>{ state.dragging = false; });
+
+/* ---------- Save/Load slots (localStorage) ---------- */
+const STORAGE_KEY = 'geber_light_hp_slots_v1';
+function loadSlots(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }catch(e){ return {}; } }
+function saveSlots(obj){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); setStatus('Slots saved',900); }catch(e){ setStatus('Storage failed',900); } }
+
+function saveHeadToSlot(headId, slotKey){
+  const slots = loadSlots();
+  slots[slotKey] = slots[slotKey] || { heads: {} };
+  const h = state.heads.find(x=>x.id===headId);
+  if(!h) return;
+  slots[slotKey].heads[headId] = { pan: h.pan, tilt: h.tilt, color: h.color, ts: Date.now() };
+  saveSlots(slots);
+}
+function loadHeadFromSlot(headId, slotKey){
+  const slots = loadSlots();
+  if(!slots[slotKey] || !slots[slotKey].heads || !slots[slotKey].heads[headId]){ setStatus('Head slot empty',900); return; }
+  const s = slots[slotKey].heads[headId];
+  const h = state.heads.find(x=>x.id===headId);
+  if(h){ h.targetPan = s.pan; h.targetTilt = s.tilt; h.color = s.color || h.color; setStatus('Head loaded',900); }
+}
+function saveAllToSlot(slotKey){
+  const data = state.heads.map(h => ({ id: h.id, pan: h.pan, tilt: h.tilt, color: h.color }));
+  const slots = loadSlots();
+  slots[slotKey] = { time: Date.now(), heads: data };
+  saveSlots(slots);
+}
+function loadAllFromSlot(slotKey){
+  const slots = loadSlots();
+  if(!slots[slotKey]){ setStatus('Slot empty',900); return; }
+  const data = slots[slotKey].heads;
+  for(const d of data){ const h = state.heads.find(x=>x.id===d.id); if(h){ h.targetPan = d.pan; h.targetTilt = d.tilt; h.color = d.color || h.color; } }
+  setStatus('All loaded',900);
+}
+
+/* ---------- Manual controls ---------- */
+function updateManualControls(headId){
+  const h = state.heads.find(x=>x.id===Number(headId));
+  if(!h) return;
+  ui.manualPan.value = Math.round(h.pan);
+  ui.manualTilt.value = Math.round(h.tilt);
+  ui.manualColor.value = h.color || '#ffffff';
+}
+
+/* ---------- Draw helpers ---------- */
+function drawOnce(){
+  drawStageBackground();
+  drawHeadMounts();
+  if(!state.beamOnTop){
+    for(const h of state.heads){ if(strobeVisibleForHead(h.id)) drawBeam(h); }
+    drawHeadMarkers();
+  } else {
+    drawHeadMarkers();
+    for(const h of state.heads){ if(strobeVisibleForHead(h.id)) drawBeam(h); }
+    for(const h of state.heads){
+      if(state.selectedHead === h.id){
+        ctx.strokeStyle = 'rgba(0,212,255,0.95)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(h.x, h.y, 18, 0, Math.PI*2); ctx.stroke();
+      }
+    }
+  }
+}
+
+/* ---------- Main loop ---------- */
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(0.05, (now - last)/1000); last = now;
+  const prevW = canvas.width, prevH = canvas.height;
+  resizeCanvasHP();
+  if(canvas.width !== prevW || canvas.height !== prevH){
+    const sx = canvas.width / (prevW || canvas.width);
+    const sy = canvas.height / (prevH || canvas.height);
+    for(const h of state.heads){ h.x = Math.round(h.x * sx); h.y = Math.round(h.y * sy); }
+    buildManualHeadSelect();
+    updateManualControls(Number(ui.manualHeadSelect.value));
+  }
+
+  if(state.power) state.time += dt;
+  strobeAccum += dt;
+
+  // sync UI -> state
+  state.dimmer = Number(ui.dimmer.value)/100;
+  state.angle = Number(ui.beamAngle.value);
+  state.range = Number(ui.beamRange.value);
+  state.globalColor = ui.globalColor.value;
+  state.rainbow = ui.rainbowBtn.textContent.indexOf('ON') >= 0;
+  state.gobo = ui.goboBtn.textContent.indexOf('ON') >= 0;
+  state.strobeMode = ui.strobeMode.value;
+  state.strobeSpeed = Number(ui.strobeSpeed.value);
+  state.prismaMode = ui.prismaMode.value;
+  state.prismaRotate = ui.prismaRotate.textContent.indexOf('ON') >= 0;
+
+  // update heads: presets -> targets (mixing)
+  for(let i=0;i<state.heads.length;i++){
+    const h = state.heads[i];
+    let sumPan=0, sumTilt=0, cnt=0;
+    for(let p=0;p<state.presetActive.length;p++){
+      if(state.presetActive[p]){
+        const off = presetOffset(p, state.time, i);
+        sumPan += off.pan; sumTilt += off.tilt; cnt++;
+      }
+    }
+    if(cnt>0){ h.targetPan = sumPan / cnt; h.targetTilt = sumTilt / cnt; }
+    // manual override when in manual mode
+    if(ui.modeSelect.value === 'manual' && Number(ui.manualHeadSelect.value) === h.id){
+      h.targetPan = Number(ui.manualPan.value);
+      h.targetTilt = Number(ui.manualTilt.value);
+    }
+    // smoothing
+    h.pan = lerp(h.pan !== undefined ? h.pan : h.targetPan, h.targetPan, SMOOTH);
+    h.tilt = lerp(h.tilt !== undefined ? h.tilt : h.targetTilt, h.targetTilt, SMOOTH);
+    h.intensity = state.dimmer;
+    if(state.prismaRotate){ h.prismRotation = (h.prismRotation || 0) + dt * 60; } else { h.prismRotation = 0; }
+    h.angle = state.angle; h.range = state.range;
+  }
+
+  // render
+  drawStageBackground();
+  drawHeadMounts();
+
+  if(!state.beamOnTop){
+    for(const h of state.heads){ if(strobeVisibleForHead(h.id)) drawBeam(h); }
+    drawHeadMarkers();
+  } else {
+    drawHeadMarkers();
+    for(const h of state.heads){ if(strobeVisibleForHead(h.id)) drawBeam(h); }
+    for(const h of state.heads){
+      if(state.selectedHead === h.id){
+        ctx.strokeStyle = 'rgba(0,212,255,0.95)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(h.x, h.y, 18, 0, Math.PI*2); ctx.stroke();
+      }
+    }
+  }
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---------- UI Wiring ---------- */
+ui.beamCount.addEventListener('input', (e)=>{ const v=Number(e.target.value); ui.beamCountLabel.textContent = String(v); initHeads(v); setStatus('Beams set to '+v,700); });
+ui.dimmer.addEventListener('input', ()=> setStatus('Dimmer ' + Math.round(Number(ui.dimmer.value)) + '%',700));
+ui.beamAngle.addEventListener('input', ()=> setStatus('Angle ' + ui.beamAngle.value + '°',700));
+ui.beamRange.addEventListener('input', ()=> setStatus('Range ' + ui.beamRange.value + 'px',700));
+
+ui.rainbowBtn.addEventListener('click', ()=>{
+  if(ui.rainbowBtn.textContent.indexOf('ON')>=0){ ui.rainbowBtn.textContent='RAINBOW OFF'; setStatus('Rainbow OFF',700); }
+  else { ui.rainbowBtn.textContent='RAINBOW ON'; setStatus('Rainbow ON',700); }
+});
+ui.goboBtn.addEventListener('click', ()=>{
+  if(ui.goboBtn.textContent.indexOf('ON')>=0){ ui.goboBtn.textContent='AURORA OFF'; setStatus('Aurora OFF',700); }
+  else { ui.goboBtn.textContent='AURORA ON'; setStatus('Aurora ON',700); }
+});
+ui.prismaRotate.addEventListener('click', ()=>{
+  if(ui.prismaRotate.textContent.indexOf('ON')>=0){ ui.prismaRotate.textContent='ROTATE OFF'; setStatus('Prisma Rotate OFF',700); }
+  else { ui.prismaRotate.textContent='ROTATE ON'; setStatus('Prisma Rotate ON',700); }
+});
+ui.powerBtn.addEventListener('click', ()=>{
+  state.power = !state.power;
+  ui.powerBtn.textContent = state.power ? 'POWER ON' : 'POWER OFF';
+  setStatus(state.power ? 'Power ON' : 'Power OFF',700);
+});
+ui.modeSelect.addEventListener('change', (e)=>{
+  ui.manualArea.style.display = e.target.value === 'manual' ? 'block' : 'none';
+  setStatus('Mode ' + e.target.value,700);
+});
+ui.manualHeadSelect.addEventListener('change', (e)=>{ state.manualSelected = Number(e.target.value); updateManualControls(state.manualSelected); });
+ui.manualPan.addEventListener('input', (e)=>{ const id = Number(ui.manualHeadSelect.value); const h = state.heads.find(x=>x.id===id); if(h) h.targetPan = Number(e.target.value); });
+ui.manualTilt.addEventListener('input', (e)=>{ const id = Number(ui.manualHeadSelect.value); const h = state.heads.find(x=>x.id===id); if(h) h.targetTilt = Number(e.target.value); });
+ui.manualColor.addEventListener('input', (e)=>{ const id = Number(ui.manualHeadSelect.value); const h = state.heads.find(x=>x.id===id); if(h){ h.color = e.target.value; setStatus(`Head ${id+1} color set`,700); }});
+
+ui.saveHeadA.addEventListener('click', ()=>{ saveHeadToSlot(state.manualSelected, 'A'); setStatus('Saved head → A',700); });
+ui.loadHeadA.addEventListener('click', ()=>{ loadHeadFromSlot(state.manualSelected, 'A'); setStatus('Loaded head ← A',700); });
+ui.saveHeadB.addEventListener('click', ()=>{ saveHeadToSlot(state.manualSelected, 'B'); setStatus('Saved head → B',700); });
+ui.loadHeadB.addEventListener('click', ()=>{ loadHeadFromSlot(state.manualSelected, 'B'); setStatus('Loaded head ← B',700); });
+ui.saveAll.addEventListener('click', ()=>{ saveAllToSlot('ALL'); setStatus('Saved ALL',700); });
+ui.loadAll.addEventListener('click', ()=>{ loadAllFromSlot('ALL'); setStatus('Loaded ALL',700); });
+ui.clearSlots.addEventListener('click', ()=>{ localStorage.removeItem(STORAGE_KEY); setStatus('Slots cleared',700); });
+
+/* ---------- Color Presets hookup ---------- */
+document.querySelectorAll('#colorPresets .colorBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const c = btn.dataset.color;
+    const id = Number(ui.manualHeadSelect.value);
+    const h = state.heads.find(x=>x.id===id);
+    if(h){ h.color = c; ui.manualColor.value = c; setStatus(`Head ${id+1} color ${c}`,700); }
+  });
+});
+
+/* ---------- Resize helper (keeps heads relative) ---------- */
+let lastW = canvas.width, lastH = canvas.height;
+function resizeCanvasIfNeeded(){
+  const prevW = lastW, prevH = lastH;
+  resizeCanvasHP();
+  if(canvas.width !== prevW || canvas.height !== prevH){
+    const sx = canvas.width / (prevW || canvas.width);
+    const sy = canvas.height / (prevH || canvas.height);
+    for(const h of state.heads){
+      h.x = Math.round(h.x * sx);
+      h.y = Math.round(h.y * sy);
+    }
+    lastW = canvas.width; lastH = canvas.height;
+    buildManualHeadSelect();
+    updateManualControls(Number(ui.manualHeadSelect.value));
+  }
+}
+
+/* ---------- Expose for debugging ---------- */
+window.GEBER_LIGHTING_HP = { state, initHeads, presetOffset };
+
+/* ---------- End of script ---------- */
+</script>
+</body>
+</html>
+<script>
+/* --- Start Custom JavaScript --- */
+/* Welcome! Start your JavaScript here */
+/* This will be included in <script> tags when you save the project */
+
+function showAlert() {
+  alert("Button clicked from JavaScript!");
+}
+
+// You can add more JS here, e.g., for interactivity
+document.addEventListener('DOMContentLoaded', () => {
+  const myBox = document.getElementById('my-box');
+  if (myBox) {
+    myBox.addEventListener('click', () => {
+      console.log('Box clicked!');
+      myBox.style.backgroundColor = '#666';
+    });
+  }
+});
+
+/* --- End Custom JavaScript --- */
+    </script>
+</body>
+</html>
