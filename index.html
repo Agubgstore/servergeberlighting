@@ -363,9 +363,10 @@ const state = {
   parleds: [],
   bgImageCanvas: null,
   miniBrutePos: { x: null, y: null },
-  dragging: false,
-  dragTarget: null,
-  dragOffset: {x:0,y:0}
+  miniBrutes: [],
+dragTarget: null,
+dragging: false,
+dragOffset: {x:0, y:0},
 };
 function withAlpha(color, alpha){
   if(!color) color = '#ffffff';
@@ -1012,27 +1013,38 @@ function drawParleds(){
     }
   }
 }
+// === POINTER DOWN ===
 canvas.addEventListener('pointerdown', (e)=>{
-  const r = canvas.getBoundingClientRect(); const px = e.clientX - r.left, py = e.clientY - r.top;
+  const r = canvas.getBoundingClientRect();
+  const px = e.clientX - r.left, py = e.clientY - r.top;
   let nearest = -1, nd = 1e9;
+
+  // === cek kepala (beam head) ===
   for(const h of state.heads){
     const d = Math.hypot(px - h.x, py - h.y);
     if(d < 30 && d < nd){ nd=d; nearest=h.id; }
   }
   if(nearest >= 0){
-    state.selectedHead = nearest; state.dragging = true; state.dragTarget = {type:'head', id:nearest};
+    state.selectedHead = nearest;
+    state.dragging = true;
+    state.dragTarget = {type:'head', id:nearest};
     const hh = state.heads.find(x=>x.id===nearest);
     state.dragOffset = { x: px - hh.x, y: py - hh.y };
-    ui.manualHeadSelect.value = nearest; updateManualControls(nearest); setStatus('Selected Head '+(nearest+1),700);
+    ui.manualHeadSelect.value = nearest;
+    updateManualControls(nearest);
+    setStatus('Selected Head '+(nearest+1),700);
     return;
   }
+
+  // === cek wallwasher ===
   for(const w of state.wallwashers){
     const barH = Math.round(canvas.height * 0.36);
     const barW = Math.max(18, Math.round(canvas.width * 0.02));
     const left = w.x - Math.round(barW/2);
     const top = w.y - Math.round(barH/2);
     if(px >= left - 8 && px <= left + barW + 8 && py >= top - 8 && py <= top + barH + 8){
-      state.dragging = true; state.dragTarget = {type:'wall', id: w.id};
+      state.dragging = true;
+      state.dragTarget = {type:'wall', id: w.id};
       state.dragOffset = { x: px - w.x, y: py - w.y };
       state.selectedWall = w.id;
       ui.wallScale.value = w.scale || 1;
@@ -1041,48 +1053,79 @@ canvas.addEventListener('pointerdown', (e)=>{
       return;
     }
   }
+
+  // === cek parled ===
   for(const p of state.parleds){
     const radius = Math.max(18, Math.round(canvas.width * 0.03));
     const d = Math.hypot(px - p.x, py - p.y);
     if(d < radius + 8){
-      state.dragging = true; state.dragTarget = {type:'par', id: p.id};
+      state.dragging = true;
+      state.dragTarget = {type:'par', id: p.id};
       state.dragOffset = { x: px - p.x, y: py - p.y };
       setStatus('Selected ParLED '+(p.id+1),700);
       return;
     }
   }
-  if(state.miniBruteOn && state.miniBrutePos.x !== null){
+
+  // === cek miniBrutes (versi baru multi) ===
+  for(const mb of (state.miniBrutes || [])){
     const size = Math.min(64, Math.round(canvas.width * 0.06));
     const hw = size * 1.6, hh = size * 0.95;
-    const hx = state.miniBrutePos.x - Math.round(hw/2), hy = state.miniBrutePos.y - Math.round(hh/2);
+    const hx = mb.x - Math.round(hw/2), hy = mb.y - Math.round(hh/2);
     if(px >= hx && px <= hx + hw && py >= hy && py <= hy + hh){
-      state.dragging = true; state.dragTarget = {type:'brute', id: 'main'};
-      state.dragOffset = { x: px - state.miniBrutePos.x, y: py - state.miniBrutePos.y };
-      setStatus('Selected Mini Brute',700);
+      state.dragging = true;
+      state.dragTarget = {type:'miniBrute', id: mb.id};
+      state.dragOffset = { x: px - mb.x, y: py - mb.y };
+      setStatus('Selected MiniBrute '+(mb.id+1),700);
       return;
     }
   }
 });
+
+
+// === POINTER MOVE ===
 canvas.addEventListener('pointermove', (e)=>{
   if(!state.dragging || !state.dragTarget) return;
-  const r = canvas.getBoundingClientRect(); const px = e.clientX - r.left, py = e.clientY - r.top;
+  const r = canvas.getBoundingClientRect();
+  const px = e.clientX - r.left, py = e.clientY - r.top;
   const t = state.dragTarget;
+
   if(t.type === 'head'){
     const h = state.heads.find(x=>x.id === t.id);
-    if(h){ h.x = Math.max(20, Math.min(canvas.width - 20, Math.round(px - state.dragOffset.x))); h.y = Math.max(10, Math.min(canvas.height - 10, Math.round(py - state.dragOffset.y))); }
+    if(h){
+      h.x = Math.max(20, Math.min(canvas.width - 20, Math.round(px - state.dragOffset.x)));
+      h.y = Math.max(10, Math.min(canvas.height - 10, Math.round(py - state.dragOffset.y)));
+    }
   } else if(t.type === 'wall'){
     const w = state.wallwashers.find(x=>x.id === t.id);
-    if(w){ w.x = Math.max(20, Math.min(canvas.width - 20, Math.round(px - state.dragOffset.x))); w.y = Math.max(60, Math.min(canvas.height*0.85, Math.round(py - state.dragOffset.y))); saveStateUI(); }
+    if(w){
+      w.x = Math.max(20, Math.min(canvas.width - 20, Math.round(px - state.dragOffset.x)));
+      w.y = Math.max(60, Math.min(canvas.height * 0.85, Math.round(py - state.dragOffset.y)));
+      saveStateUI();
+    }
   } else if(t.type === 'par'){
     const p = state.parleds.find(x=>x.id === t.id);
-    if(p){ p.x = Math.max(20, Math.min(canvas.width - 20, Math.round(px - state.dragOffset.x))); p.y = Math.max(40, Math.min(canvas.height*0.9, Math.round(py - state.dragOffset.y))); saveStateUI(); }
-  } else if(t.type === 'brute'){
-    state.miniBrutePos.x = Math.max(20, Math.min(canvas.width - 20, Math.round(px - state.dragOffset.x)));
-    state.miniBrutePos.y = Math.max(20, Math.min(canvas.height - 20, Math.round(py - state.dragOffset.y)));
-    saveStateUI();
+    if(p){
+      p.x = Math.max(20, Math.min(canvas.width - 20, Math.round(px - state.dragOffset.x)));
+      p.y = Math.max(40, Math.min(canvas.height * 0.9, Math.round(py - state.dragOffset.y)));
+      saveStateUI();
+    }
+  } else if(t.type === 'miniBrute'){
+    const mb = state.miniBrutes.find(x=>x.id === t.id);
+    if(mb){
+      mb.x = Math.max(20, Math.min(canvas.width - 20, Math.round(px - state.dragOffset.x)));
+      mb.y = Math.max(20, Math.min(canvas.height - 20, Math.round(py - state.dragOffset.y)));
+      saveStateUI();
+    }
   }
 });
-window.addEventListener('pointerup', ()=> { state.dragging = false; state.dragTarget = null; });
+
+
+// === POINTER UP (pastikan ada juga ini) ===
+canvas.addEventListener('pointerup', ()=>{
+  state.dragging = false;
+  state.dragTarget = null;
+});
 const STORAGE_KEY = 'geber_light_fix_v2';
 function loadStorage(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }catch(e){ return {}; } }
 function saveStorage(obj){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); setStatus('Saved',900);}catch(e){ setStatus('Storage failed',900);} }
